@@ -2,8 +2,11 @@
 <html lang="es">
 <head>
     <meta charset='utf-8'>
-    <title>Rastreador de Gastos</title>
+    <title>Rastreador de Gastos en linea</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <!-- CDN para jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -14,7 +17,13 @@
 <body>
     <div class="container"> 
         <h1>Rastreador de Gastos</h1>
-        <div class="section"> <!--SECCION PARA AGREGAR INGRESOS-->
+        <p>Bienvenido al rastreador de gastos. Aquí puedes agregar tus ingresos y gastos, y ver un resumen de tu presupuesto.</p>
+        <p>Para comenzar, agrega tus ingresos y gastos en las secciones correspondientes.</p>
+
+        <div id="notification-container" class="notification-container"></div> <!-- Contenedor para las notificaciones -->
+
+        <!--SECCION PARA AGREGAR INGRESOS-->
+        <div class="section">         
             <h2>Ingresos</h2>
             <div class="input-group">
                 <label for="income-description">Descripción</label>
@@ -29,7 +38,8 @@
             </div>
         </div>
         
-        <div class="section"> <!--SECCION PARA AGREGAR gastos-->
+        <!--SECCION PARA AGREGAR gastos-->
+        <div class="section">          
             <h2>Gastos</h2>
             <div class="input-group">
                 <label for="expense-description">Descripción</label>
@@ -54,8 +64,10 @@
             </div>
         </div>
 
-        <div class="table-container"> <!--SECCION PARA MOSTRAR EL HISTORIAL DE TRANSACCIONES-->
-            <h2>Histirial de Transacciones</h2>
+        
+        <!--SECCION PARA MOSTRAR EL HISTORIAL DE TRANSACCIONES-->
+        <div class="table-container"> 
+            <h2>Historial de Transacciones</h2>
             <table>
                 <thead>
                     <tr>
@@ -72,20 +84,69 @@
             </table>
         </div>
 
-        <div class="summary"> <!--SECCION PARA MOSTRAR EL RESUMEN DEL PRESUPUESTO-->
+
+        <!--SECCION PARA MOSTRAR EL RESUMEN DEL PRESUPUESTO-->
+        <div class="summary"> 
             <h2>Resumen de presupuesto</h2>
-            <p>Total de Ingresos: $<span id="total-income">0</span></p>
-            <p>Total de Gastos: $<span id="total-expenses">0</span></p>
-            <p>Balance: $<span id="balance">0</span></p>
-            <p>% de Gastos: <span id="expense-percentage">0</span>%</p>
-            <p>% de Ingresos: <span id="income-percentage">0</span>%</p>
-            <p>% de Ahorro: <span id="savings-percentage">0</span>%</p>
-            <p>% de Gastos Fijos: <span id="fixed-expenses-percentage">0</span>%</p>
-            <p>% de Gastos Variables: <span id="variable-expenses-percentage">0</span>%</p>
+            
+            <div class="summary-cards">
+                <div class="summary-card income-card">
+                    <div class="card-icon">💰</div>
+                    <div class="card-content">
+                        <h3>Ingresos</h3>
+                        <div class="card-amount-income">$<span id="total-income">0</span></div>
+                        <div class="card-percentage"><span id="income-percentage">0</span>%</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card expense-card">
+                    <div class="card-icon">💸</div>
+                    <div class="card-content">
+                        <h3>Gastos</h3>
+                        <div class="card-amount-expenses">$<span id="total-expenses">0</span></div>
+                        <div class="card-percentage"><span id="expense-percentage">0</span>%</div>
+                    </div>
+                </div>
+                
+                <div class="summary-card balance-card">
+                    <div class="card-icon">⚖️</div>
+                    <div class="card-content">
+                        <h3>Balance</h3>
+                        <div class="card-amount-balance">$<span id="balance">0</span></div>
+                        <div class="card-percentage"><span id="expense-percentage">--</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-details">
+                <div class="detail-item">
+                    <span class="detail-label">Ahorro:</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill savings" id="savings-bar"></div>
+                    </div>
+                    <span class="detail-value"><span id="savings-percentage">0</span>%</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Gastos Fijos:</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill fixed" id="fixed-expenses-bar"></div>
+                    </div>
+                    <span class="detail-value"><span id="fixed-expenses-percentage">0</span>%</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Gastos Variables:</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill variable" id="variable-expenses-bar"></div>
+                    </div>
+                    <span class="detail-value"><span id="variable-expenses-percentage">0</span>%</span>
+                </div>
+            </div>
 
             <div class="summary-buttons-container">
                 <div class="summary-button-group">
-                    <button onclick="clearAll()">Limpiar Todo</button>
+                    <button onclick="clearAll()" class="clear-all-button">Limpiar Todo</button>
                 </div>
                 <div class="summary-button-group">
                     <button onclick="exportToCSV()">Exportar a CSV</button>

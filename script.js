@@ -1,6 +1,29 @@
 // lista para almacenar las transacciones
 let transactions = [];
 
+// Función para mostrar notificaciones
+function showNotification(message, type = 'success') {
+    const notificationContainer = document.getElementById('notification-container');
+    
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    // Añadir barra de progreso
+    const progressBar = document.createElement('div');
+    progressBar.className = 'notification-progress';
+    notification.appendChild(progressBar);
+    
+    // Añadir al contenedor
+    notificationContainer.appendChild(notification);
+    
+    // Eliminar notificación después de 4 segundos
+    setTimeout(() => {
+        notification.remove();
+    }, 4000);
+}
+
 // Función para agregar ingresos
 function addIncome() {
     const description = document.getElementById('income-description').value.trim();
@@ -26,6 +49,9 @@ function addIncome() {
     // Actualizar la UI
     updateTransactionHistory();
     updateSummary();
+    
+    // Mostrar notificación de éxito
+    showNotification(`Ingreso agregado: ${description} - $${amount.toFixed(2)}`, 'success');
     
     // limpiar inputs al agregar
     document.getElementById('income-description').value = '';
@@ -59,6 +85,9 @@ function addExpense() {
     updateTransactionHistory();
     updateSummary();
     
+    // Mostrar notificación de éxito
+    showNotification(`Gasto agregado: ${description} - $${amount.toFixed(2)}`, 'error');
+    
     // Limpiar inputs al agregar
     document.getElementById('expense-description').value = '';
     document.getElementById('expense-amount').value = '';
@@ -66,12 +95,21 @@ function addExpense() {
 
 // Función para eliminar una transacción de la lista
 function deleteTransaction(id) {
+    // Obtener la transacción que se va a eliminar para mostrar sus datos en la notificación
+    const transactionToDelete = transactions.find(transaction => transaction.id === id);
+    
     // Filtrar la transacción seleccionada
     transactions = transactions.filter(transaction => transaction.id !== id);
     
     // Actualizar la UI
     updateTransactionHistory();
     updateSummary();
+    
+    // Mostrar notificación de eliminación
+    if (transactionToDelete) {
+        const notificationType = transactionToDelete.type === 'Ingreso' ? 'error' : 'success';
+        showNotification(`${transactionToDelete.type} eliminado: ${transactionToDelete.description} - $${transactionToDelete.amount.toFixed(2)}`, notificationType);
+    }
 }
 
 // Función para actualizar el historial de transacciones
@@ -115,14 +153,14 @@ function updateSummary() {
     const incomePercentage = 100;
     const savingsPercentage = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(2) : 0;
     
-    // Calcular porcentaje de gastos fijos (considerando servicios como gasto fijo)
+    // Calcular porcentaje de gastos fijos (servicios son como gasto fijo)
     const fixedExpenses = transactions
         .filter(transaction => transaction.type === 'Gasto' && transaction.category === 'Servicios')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
         
     const fixedExpensesPercentage = totalIncome > 0 ? (fixedExpenses / totalIncome * 100).toFixed(2) : 0;
     
-    // Calcular porcentaje de gastos variables (todos los gastos que no son fijos)
+    // Calcular porcentaje de gastos variables (todos los gastos que no son servicios)
     const variableExpenses = totalExpenses - fixedExpenses;
     const variableExpensesPercentage = totalIncome > 0 ? (variableExpenses / totalIncome * 100).toFixed(2) : 0;
     
@@ -135,6 +173,23 @@ function updateSummary() {
     document.getElementById('savings-percentage').textContent = savingsPercentage;
     document.getElementById('fixed-expenses-percentage').textContent = fixedExpensesPercentage;
     document.getElementById('variable-expenses-percentage').textContent = variableExpensesPercentage;
+    
+    // Actualizar barras de progreso
+    document.getElementById('savings-bar').style.width = `${savingsPercentage}%`;
+    document.getElementById('fixed-expenses-bar').style.width = `${fixedExpensesPercentage}%`;
+    document.getElementById('variable-expenses-bar').style.width = `${variableExpensesPercentage}%`;
+    
+    // Aplicar clases según el balance
+    const balanceElement = document.getElementById('balance');
+    if (balance > 0) {
+        balanceElement.classList.add('income-amount');
+        balanceElement.classList.remove('expense-amount');
+    } else if (balance < 0) {
+        balanceElement.classList.add('expense-amount');
+        balanceElement.classList.remove('income-amount');
+    } else {
+        balanceElement.classList.remove('income-amount', 'expense-amount');
+    }
 }
 
 // Función para limpiar todos los datos
@@ -143,6 +198,8 @@ function clearAll() {
         transactions = [];
         updateTransactionHistory();
         updateSummary();
+        // Mostrar notificación de limpieza
+        showNotification('Todas las transacciones han sido eliminadas', 'error');
     }
 }
 
@@ -153,7 +210,7 @@ function exportToCSV() {
         return;
     }
     
-    // Crear cabeceras CSV
+    // Crear titulos paraa CSV
     let csv = 'Descripción,Categoría,Cantidad,Tipo\n';
     
     // Agregar datos
@@ -297,3 +354,4 @@ window.addEventListener('load', function() {
 window.addEventListener('beforeunload', function() {
     localStorage.setItem('transactions', JSON.stringify(transactions));
 });
+
